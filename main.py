@@ -71,19 +71,24 @@ def display_message(text):
     time.sleep(2)
 
 
-def start_button_click():
-    game_loop()
-
-
 def exit_button_click():
     pygame.quit()
     quit()
 
 
+def game_over():
+    text_surf, text_rect = get_text_objects("GAME OVER", font_size=100, font_color=RED)
+    text_rect.center = ((DISPLAY_WIDTH / 2), (DISPLAY_HEIGHT / 2))
+    game_display.blit(text_surf, text_rect)
+    pygame.display.update()
+    time.sleep(3)
+    main()
+
+
 def intro():
     intro_screen = True
 
-    while intro:
+    while intro_screen:
         for event in pygame.event.get():
             print(event)
             if event.type == pygame.QUIT:
@@ -91,7 +96,7 @@ def intro():
                 quit()
 
         game_display.fill(BLACK)
-        text_surf, text_rect = get_text_objects("RPyG", 100)
+        text_surf, text_rect = get_text_objects("RPyG", font_size=100)
         text_rect.center = ((DISPLAY_WIDTH / 2), (DISPLAY_HEIGHT / 2))
         game_display.blit(text_surf, text_rect)
 
@@ -105,7 +110,7 @@ def intro():
         if start_button.collidepoint(mouse_x, mouse_y):
             pygame.draw.rect(game_display, DARK_GREEN, start_button)
             if click:
-                start_button_click()
+                intro_screen = False
         else:
             pygame.draw.rect(game_display, GREEN, start_button)
         if exit_button.collidepoint(mouse_x, mouse_y):
@@ -129,18 +134,26 @@ def intro():
 def game_loop():
     x = 0.5 * DISPLAY_WIDTH
     y = 0.5 * DISPLAY_HEIGHT
+    global v_x
+    global v_y
+    v_x = 0
+    v_y = 0
     dead = False
 
     while not dead:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                dead = True
+                pygame.quit()
+                quit()
             move_player(event)
             print(event)
 
         x += v_x
         y += v_y
+
+        if x == 0:
+            dead = True
 
         if x > DISPLAY_WIDTH - PLAYER_WIDTH:
             display_message(OUT_OF_BOUNDS_MESSAGE)
@@ -160,9 +173,13 @@ def game_loop():
         pygame.display.update()
         clock.tick(60)
 
+    game_over()
 
-if __name__ == '__main__':
+
+def main():
     intro()
     game_loop()
-    pygame.quit()
-    quit()
+
+
+if __name__ == '__main__':
+    main()
