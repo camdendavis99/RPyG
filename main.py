@@ -26,6 +26,8 @@ class Player:
     def __init__(self):
         self.image = pygame.image.load('assets/player.png')
         self.speed = 10
+        self.health = 100
+        self.damage = 10
         self.width = 50
         self.height = 75
         self.position = Vector2()
@@ -57,6 +59,26 @@ class Player:
                 self.velocity.x = 0
             elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                 self.velocity.y = 0
+
+
+class Enemy:
+    def __init__(self):
+        self.image = None
+        self.speed = None
+        self.health = None
+        self.damage = None
+        self.width = None
+        self.height = None
+        self.position = None
+        self.velocity = None
+
+    def draw(self):
+        game_display.blit(self.image, self.position)
+
+    def move(self, player_position):
+        path_to_player = player_position - self.position
+        self.velocity = self.speed * path_to_player.normalize()
+        self.position += self.velocity
 
 
 def get_text_objects(text, font_size=14, font_color=WHITE, font='freesansbold.ttf'):
