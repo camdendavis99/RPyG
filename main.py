@@ -1,4 +1,5 @@
 import pygame
+from pygame.math import Vector2
 import time
 
 
@@ -16,43 +17,46 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 DARK_RED = (200, 0, 0)
 DARK_GREEN = (0, 200, 0)
-PLAYER_SPEED = 10
-PLAYER_WIDTH = 50
-PLAYER_HEIGHT = 75
 OUT_OF_BOUNDS_MESSAGE = 'That path is too dangerous for now'
 
 clock = pygame.time.Clock()
-player_img = pygame.image.load('assets/player.png')
-
-v_x = 0
-v_y = 0
 
 
-def player(x, y):
-    game_display.blit(player_img, (x, y))
+class Player:
+    def __init__(self):
+        self.image = pygame.image.load('assets/player.png')
+        self.speed = 10
+        self.width = 50
+        self.height = 75
+        self.position = Vector2()
+        self.position.x = DISPLAY_WIDTH / 2
+        self.position.y = DISPLAY_HEIGHT / 2
+        self.velocity = Vector2()
+        self.velocity.x = 0
+        self.velocity.y = 0
 
+    def draw(self):
+        game_display.blit(self.image, self.position)
 
-def move_player(event):
-    global v_x
-    global v_y
+    def move(self):
+        self.position += self.velocity
 
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_LEFT:
-            v_x = -PLAYER_SPEED
-        elif event.key == pygame.K_RIGHT:
-            v_x = PLAYER_SPEED
+    def change_velocity(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                self.velocity.x = -self.speed
+            elif event.key == pygame.K_RIGHT:
+                self.velocity.x = self.speed
 
-        elif event.key == pygame.K_UP:
-            v_y = -PLAYER_SPEED
-        elif event.key == pygame.K_DOWN:
-            v_y = PLAYER_SPEED
-    elif event.type == pygame.KEYUP:
-        if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-            v_x = 0
-        elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-            v_y = 0
-
-    return v_x, v_y
+            elif event.key == pygame.K_UP:
+                self.velocity.y = -self.speed
+            elif event.key == pygame.K_DOWN:
+                self.velocity.y = self.speed
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                self.velocity.x = 0
+            elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                self.velocity.y = 0
 
 
 def get_text_objects(text, font_size=14, font_color=WHITE, font='freesansbold.ttf'):
@@ -132,12 +136,7 @@ def intro():
 
 
 def game_loop():
-    x = 0.5 * DISPLAY_WIDTH
-    y = 0.5 * DISPLAY_HEIGHT
-    global v_x
-    global v_y
-    v_x = 0
-    v_y = 0
+    player = Player()
     dead = False
 
     while not dead:
@@ -146,30 +145,29 @@ def game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            move_player(event)
+            player.change_velocity(event)
             print(event)
 
-        x += v_x
-        y += v_y
+        player.move()
 
-        if x == 0:
+        if player.position.x == 0:
             dead = True
 
-        if x > DISPLAY_WIDTH - PLAYER_WIDTH:
+        if player.position.x > DISPLAY_WIDTH - player.width:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            x = DISPLAY_WIDTH - PLAYER_WIDTH
-        elif x < 0:
+            player.position.x = DISPLAY_WIDTH - player.width
+        elif player.position.x < 0:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            x = 0
-        if y > DISPLAY_HEIGHT - PLAYER_HEIGHT:
+            player.position.x = 0
+        if player.position.y > DISPLAY_HEIGHT - player.height:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            y = DISPLAY_HEIGHT - PLAYER_HEIGHT
-        elif y < 0:
+            player.position.y = DISPLAY_HEIGHT - player.height
+        elif player.position.y < 0:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            y = 0
+            player.position.y = 0
 
         game_display.fill(BLACK)
-        player(x, y)
+        player.draw()
         pygame.display.update()
         clock.tick(60)
 
