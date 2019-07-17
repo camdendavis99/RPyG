@@ -1,13 +1,17 @@
 import pygame
+from typing import List, Tuple
 from pygame.math import Vector2
+from source.entities.GenericEntity import Entity
+from source.entities.Player import Player
+from source.entities.Enemy import Enemy
 import time
 
 
 pygame.init()
 
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 600
-game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+WIN_WIDTH = 800
+WIN_HEIGHT = 600
+game_display = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('RPyG')
 
 BLACK = (0, 0, 0)
@@ -22,77 +26,17 @@ OUT_OF_BOUNDS_MESSAGE = 'That path is too dangerous for now'
 clock = pygame.time.Clock()
 
 
-class Player:
-    def __init__(self):
-        self.image = pygame.image.load('assets/player.png')
-        self.speed = 10
-        self.health = 100
-        self.damage = 10
-        self.width = 50
-        self.height = 75
-        self.position = Vector2()
-        self.position.x = DISPLAY_WIDTH / 2
-        self.position.y = DISPLAY_HEIGHT / 2
-        self.velocity = Vector2()
-        self.velocity.x = 0
-        self.velocity.y = 0
-
-    def draw(self):
-        game_display.blit(self.image, self.position)
-
-    def move(self):
-        self.position += self.velocity
-
-    def change_velocity(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                self.velocity.x = -self.speed
-            elif event.key == pygame.K_RIGHT:
-                self.velocity.x = self.speed
-
-            elif event.key == pygame.K_UP:
-                self.velocity.y = -self.speed
-            elif event.key == pygame.K_DOWN:
-                self.velocity.y = self.speed
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                self.velocity.x = 0
-            elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                self.velocity.y = 0
-
-
-class Enemy:
-    def __init__(self):
-        self.image = None
-        self.speed = None
-        self.health = None
-        self.damage = None
-        self.width = None
-        self.height = None
-        self.position = None
-        self.velocity = None
-
-    def draw(self):
-        game_display.blit(self.image, self.position)
-
-    def move(self, player_position):
-        path_to_player = player_position - self.position
-        self.velocity = self.speed * path_to_player.normalize()
-        self.position += self.velocity
-
-
-def get_text_objects(text, font_size=14, font_color=WHITE, font='freesansbold.ttf'):
+def get_text_objects(text: str, font_size=14, font_color=WHITE, font='freesansbold.ttf') -> Tuple:
     font_object = pygame.font.Font(font, font_size)
     text_surf = font_object.render(text, True, font_color)
     text_rect = text_surf.get_rect()
     return text_surf, text_rect
 
 
-def display_message(text):
-    text_surf, text_rect = get_text_objects(text, font_size=24)
-    text_rect.center = ((DISPLAY_WIDTH/2), (DISPLAY_HEIGHT - (DISPLAY_HEIGHT/10)))
+def display_message(text: str, font_size=24, location=(WIN_WIDTH/2, WIN_HEIGHT - WIN_HEIGHT/10)) -> None:
+    text_surf, text_rect = get_text_objects(text, font_size=font_size)
+    text_rect.center = location
     game_display.blit(text_surf, text_rect)
-
     pygame.display.update()
     time.sleep(2)
 
@@ -104,7 +48,7 @@ def exit_button_click():
 
 def game_over():
     text_surf, text_rect = get_text_objects("GAME OVER", font_size=100, font_color=RED)
-    text_rect.center = ((DISPLAY_WIDTH / 2), (DISPLAY_HEIGHT / 2))
+    text_rect.center = ((WIN_WIDTH / 2), (WIN_HEIGHT / 2))
     game_display.blit(text_surf, text_rect)
     pygame.display.update()
     time.sleep(3)
@@ -123,7 +67,7 @@ def intro():
 
         game_display.fill(BLACK)
         text_surf, text_rect = get_text_objects("RPyG", font_size=100)
-        text_rect.center = ((DISPLAY_WIDTH / 2), (DISPLAY_HEIGHT / 2))
+        text_rect.center = ((WIN_WIDTH / 2), (WIN_HEIGHT / 2))
         game_display.blit(text_surf, text_rect)
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -157,8 +101,20 @@ def intro():
         clock.tick(15)
 
 
+def move_entities(entity_list: List[Entity]):
+    for entity in entity_list:
+        entity.move()
+
+
+def draw_entities(entity_list: List[Entity]):
+    for entity in entity_list:
+        entity.draw(game_display)
+
+
 def game_loop():
     player = Player()
+    entities: List[Entity] = [player]
+    player.spawn(WIN_WIDTH / 2, WIN_HEIGHT / 2)
     dead = False
 
     while not dead:
@@ -170,26 +126,26 @@ def game_loop():
             player.change_velocity(event)
             print(event)
 
-        player.move()
+        move_entities(entities)
 
         if player.position.x == 0:
             dead = True
 
-        if player.position.x > DISPLAY_WIDTH - player.width:
+        if player.position.x > WIN_WIDTH - player.width:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            player.position.x = DISPLAY_WIDTH - player.width
+            player.position.x = WIN_WIDTH - player.width
         elif player.position.x < 0:
             display_message(OUT_OF_BOUNDS_MESSAGE)
             player.position.x = 0
-        if player.position.y > DISPLAY_HEIGHT - player.height:
+        if player.position.y > WIN_HEIGHT - player.height:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            player.position.y = DISPLAY_HEIGHT - player.height
+            player.position.y = WIN_HEIGHT - player.height
         elif player.position.y < 0:
             display_message(OUT_OF_BOUNDS_MESSAGE)
             player.position.y = 0
 
         game_display.fill(BLACK)
-        player.draw()
+        draw_entities(entities)
         pygame.display.update()
         clock.tick(60)
 
