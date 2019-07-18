@@ -3,7 +3,8 @@ from typing import List, Tuple
 from pygame.math import Vector2
 from source.entities.GenericEntity import Entity
 from source.entities.Player import Player
-from source.entities.Enemy import Enemy
+from source.entities.Goblin import Goblin
+import random
 import time
 
 
@@ -123,6 +124,12 @@ def game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+                goblin = Goblin()
+                entities.append(goblin)
+                spawn_x = random.randint(goblin.width/2, WIN_WIDTH - goblin.height/2)
+                spawn_y = random.randint(goblin.height/2, WIN_HEIGHT - goblin.height/2)
+                goblin.spawn(spawn_x, spawn_y)
             player.change_velocity(event)
             print(event)
 

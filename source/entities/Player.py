@@ -9,11 +9,14 @@ class Player(Entity):
     def __init__(self):
         Entity.__init__(self)
         self.image = pygame.image.load(self.PLAYER_IMG_PATH)
-        self.speed = 10
+        self.speed = 5
         self.health = 100
         self.damage = 10
         self.width = 50
         self.height = 75
+        self.hit_stun = 1
+        self.knockback = 10
+        self.range = 50
 
     def change_velocity(self, event):
         if event.type == pygame.KEYDOWN:

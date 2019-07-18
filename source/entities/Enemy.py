@@ -10,7 +10,6 @@ class Enemy(Entity):
         self.damage = None
         self.width = None
         self.height = None
-        self.position = None
 
     def change_velocity(self, player_position):
         path_to_player = player_position - self.position
