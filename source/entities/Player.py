@@ -17,6 +17,8 @@ class Player(Entity):
         self.hit_stun = 1
         self.knockback = 10
         self.range = 50
+        self.attack_speed = 100
+        self.attack_delay = 1000 * self.attack_speed / 60
 
     def change_velocity(self, event):
         if event.type == pygame.KEYDOWN:
@@ -34,3 +36,6 @@ class Player(Entity):
                 self.velocity.x = 0
             elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                 self.velocity.y = 0
+
+    def update(self, player):
+        self.move()

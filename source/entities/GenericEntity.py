@@ -13,6 +13,8 @@ class Entity:
         self.range = None
         self.knockback = None
         self.hit_stun = None
+        self.attack_speed = None
+        self.attack_delay = None
         self.position = Vector2()
         self.velocity = Vector2()
         self.velocity.x = 0
@@ -41,3 +43,6 @@ class Entity:
 
     def die(self):
         del self
+
+    def update(self, player):
+        pass

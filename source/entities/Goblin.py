@@ -14,6 +14,8 @@ class Goblin(Enemy):
         self.damage = 8
         self.width = 40
         self.height = 60
-        self.range = 25
+        self.range = 60
         self.knockback = 4
         self.hit_stun = 0.25
+        self.attack_speed = 30
+        self.attack_delay = 1000 * self.attack_speed / 60

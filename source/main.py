@@ -3,6 +3,7 @@ from typing import List, Tuple
 from pygame.math import Vector2
 from source.entities.GenericEntity import Entity
 from source.entities.Player import Player
+from source.entities.Enemy import Enemy
 from source.entities.Goblin import Goblin
 import random
 import time
@@ -102,9 +103,9 @@ def intro():
         clock.tick(15)
 
 
-def move_entities(entity_list: List[Entity]):
+def update_entities(entity_list: List[Entity], player):
     for entity in entity_list:
-        entity.move()
+        entity.update(player)
 
 
 def draw_entities(entity_list: List[Entity]):
@@ -133,9 +134,9 @@ def game_loop():
             player.change_velocity(event)
             print(event)
 
-        move_entities(entities)
+        update_entities(entities, player)
 
-        if player.position.x == 0:
+        if player.position.x == 0 or player.health <= 0:
             dead = True
 
         if player.position.x > WIN_WIDTH - player.width:
