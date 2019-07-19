@@ -1,12 +1,19 @@
 import pygame
+from typing import List, Tuple
+from pygame.math import Vector2
+from source.entities.GenericEntity import Entity
+from source.entities.Player import Player
+from source.entities.Enemy import Enemy
+from source.entities.Goblin import Goblin
+import random
 import time
 
 
 pygame.init()
 
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 600
-game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+WIN_WIDTH = 800
+WIN_HEIGHT = 600
+game_display = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption('RPyG')
 
 BLACK = (0, 0, 0)
@@ -16,57 +23,23 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 DARK_RED = (200, 0, 0)
 DARK_GREEN = (0, 200, 0)
-PLAYER_SPEED = 10
-PLAYER_WIDTH = 50
-PLAYER_HEIGHT = 75
+GRAY = (150, 150, 150)
 OUT_OF_BOUNDS_MESSAGE = 'That path is too dangerous for now'
 
 clock = pygame.time.Clock()
-player_img = pygame.image.load('assets/player.png')
-
-v_x = 0
-v_y = 0
 
 
-def player(x, y):
-    game_display.blit(player_img, (x, y))
-
-
-def move_player(event):
-    global v_x
-    global v_y
-
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_LEFT:
-            v_x = -PLAYER_SPEED
-        elif event.key == pygame.K_RIGHT:
-            v_x = PLAYER_SPEED
-
-        elif event.key == pygame.K_UP:
-            v_y = -PLAYER_SPEED
-        elif event.key == pygame.K_DOWN:
-            v_y = PLAYER_SPEED
-    elif event.type == pygame.KEYUP:
-        if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-            v_x = 0
-        elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-            v_y = 0
-
-    return v_x, v_y
-
-
-def get_text_objects(text, font_size=14, font_color=WHITE, font='freesansbold.ttf'):
+def get_text_objects(text: str, font_size=14, font_color=WHITE, font='freesansbold.ttf') -> Tuple:
     font_object = pygame.font.Font(font, font_size)
     text_surf = font_object.render(text, True, font_color)
     text_rect = text_surf.get_rect()
     return text_surf, text_rect
 
 
-def display_message(text):
-    text_surf, text_rect = get_text_objects(text, font_size=24)
-    text_rect.center = ((DISPLAY_WIDTH/2), (DISPLAY_HEIGHT - (DISPLAY_HEIGHT/10)))
+def display_message(text: str, font_size=24, location=(WIN_WIDTH/2, WIN_HEIGHT - WIN_HEIGHT/10)) -> None:
+    text_surf, text_rect = get_text_objects(text, font_size=font_size)
+    text_rect.center = location
     game_display.blit(text_surf, text_rect)
-
     pygame.display.update()
     time.sleep(2)
 
@@ -78,7 +51,7 @@ def exit_button_click():
 
 def game_over():
     text_surf, text_rect = get_text_objects("GAME OVER", font_size=100, font_color=RED)
-    text_rect.center = ((DISPLAY_WIDTH / 2), (DISPLAY_HEIGHT / 2))
+    text_rect.center = ((WIN_WIDTH / 2), (WIN_HEIGHT / 2))
     game_display.blit(text_surf, text_rect)
     pygame.display.update()
     time.sleep(3)
@@ -97,7 +70,7 @@ def intro():
 
         game_display.fill(BLACK)
         text_surf, text_rect = get_text_objects("RPyG", font_size=100)
-        text_rect.center = ((DISPLAY_WIDTH / 2), (DISPLAY_HEIGHT / 2))
+        text_rect.center = ((WIN_WIDTH / 2), (WIN_HEIGHT / 2))
         game_display.blit(text_surf, text_rect)
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -131,13 +104,31 @@ def intro():
         clock.tick(15)
 
 
+def update_entities(entity_list: List[Entity], player, cur_time):
+    for entity in entity_list:
+        entity.update(player, cur_time)
+
+
+def draw_entities(entity_list: List[Entity]):
+    for entity in entity_list:
+        entity.draw(game_display)
+
+
+def display_health_bar(health):
+    bar_left_x = WIN_WIDTH // 6
+    bar_right_x = WIN_WIDTH - bar_left_x
+    bar_max_length = bar_right_x - bar_left_x
+    bar_cur_length = int(health / 100 * bar_max_length)
+    gray_bar = pygame.Rect(bar_left_x, 16, bar_max_length, 30)
+    red_bar = pygame.Rect(bar_left_x, 16, bar_cur_length, 30)
+    pygame.draw.rect(game_display, GRAY, gray_bar)
+    pygame.draw.rect(game_display, RED, red_bar)
+
+
 def game_loop():
-    x = 0.5 * DISPLAY_WIDTH
-    y = 0.5 * DISPLAY_HEIGHT
-    global v_x
-    global v_y
-    v_x = 0
-    v_y = 0
+    player = Player()
+    entities: List[Entity] = [player]
+    player.spawn(WIN_WIDTH / 2, WIN_HEIGHT / 2)
     dead = False
 
     while not dead:
@@ -146,30 +137,35 @@ def game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            move_player(event)
-            print(event)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+                goblin = Goblin()
+                entities.append(goblin)
+                spawn_x = random.randint(goblin.width/2, WIN_WIDTH - goblin.height/2)
+                spawn_y = random.randint(goblin.height/2, WIN_HEIGHT - goblin.height/2)
+                goblin.spawn(spawn_x, spawn_y)
+            player.change_velocity(event)
 
-        x += v_x
-        y += v_y
+        update_entities(entities, player, pygame.time.get_ticks())
 
-        if x == 0:
+        if player.position.x == 0 or player.health <= 0:
             dead = True
 
-        if x > DISPLAY_WIDTH - PLAYER_WIDTH:
+        if player.position.x > WIN_WIDTH - player.width:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            x = DISPLAY_WIDTH - PLAYER_WIDTH
-        elif x < 0:
+            player.position.x = WIN_WIDTH - player.width
+        elif player.position.x < 0:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            x = 0
-        if y > DISPLAY_HEIGHT - PLAYER_HEIGHT:
+            player.position.x = 0
+        if player.position.y > WIN_HEIGHT - player.height:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            y = DISPLAY_HEIGHT - PLAYER_HEIGHT
-        elif y < 0:
+            player.position.y = WIN_HEIGHT - player.height
+        elif player.position.y < 0:
             display_message(OUT_OF_BOUNDS_MESSAGE)
-            y = 0
+            player.position.y = 0
 
         game_display.fill(BLACK)
-        player(x, y)
+        draw_entities(entities)
+        display_health_bar(player.health)
         pygame.display.update()
         clock.tick(60)
 
