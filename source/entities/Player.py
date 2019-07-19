@@ -15,9 +15,10 @@ class Player(Entity):
         self.width = 50
         self.height = 75
         self.hit_stun = 1
-        self.knockback = 10
+        self.knockback_force = 10
         self.range = 50
         self.attack_speed = 100
+        self.received_attack = None
         self.attack_delay = 1000 * self.attack_speed / 60
 
     def change_velocity(self, event):
@@ -37,5 +38,29 @@ class Player(Entity):
             elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                 self.velocity.y = 0
 
-    def update(self, player):
+    def knockback(self, time):
+        print(self.received_attack.direction, self.received_attack.force)
+        if time - self.received_attack.time < self.received_attack.knockback_time:
+            self.velocity = self.received_attack.direction * self.received_attack.force
+        else:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                self.velocity.x = -self.speed
+            elif keys[pygame.K_RIGHT]:
+                self.velocity.x = self.speed
+            else:
+                self.velocity.x = 0
+
+            if keys[pygame.K_UP]:
+                self.velocity.y = -self.speed
+            elif keys[pygame.K_DOWN]:
+                self.velocity.y = self.speed
+            else:
+                self.velocity.y = 0
+
+            self.received_attack = None
+
+    def update(self, player, time):
+        if self.received_attack:
+            self.knockback(time)
         self.move()

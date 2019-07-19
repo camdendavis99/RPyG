@@ -104,9 +104,9 @@ def intro():
         clock.tick(15)
 
 
-def update_entities(entity_list: List[Entity], player):
+def update_entities(entity_list: List[Entity], player, cur_time):
     for entity in entity_list:
-        entity.update(player)
+        entity.update(player, cur_time)
 
 
 def draw_entities(entity_list: List[Entity]):
@@ -144,9 +144,8 @@ def game_loop():
                 spawn_y = random.randint(goblin.height/2, WIN_HEIGHT - goblin.height/2)
                 goblin.spawn(spawn_x, spawn_y)
             player.change_velocity(event)
-            print(event)
 
-        update_entities(entities, player)
+        update_entities(entities, player, pygame.time.get_ticks())
 
         if player.position.x == 0 or player.health <= 0:
             dead = True

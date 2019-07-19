@@ -1,3 +1,4 @@
+import pygame
 from pygame.math import Vector2
 from source.entities.Attack import Attack
 
@@ -11,14 +12,17 @@ class Entity:
         self.width = None
         self.height = None
         self.range = None
-        self.knockback = None
+        self.knockback_force = None
         self.hit_stun = None
         self.attack_speed = None
         self.attack_delay = None
+        self.knockback_time = 200
+        self.time_pushed = 0.
         self.position = Vector2()
         self.velocity = Vector2()
         self.velocity.x = 0
         self.velocity.y = 0
+        self.received_attack = None
 
     def move(self):
         self.position += self.velocity
@@ -30,11 +34,15 @@ class Entity:
         self.position.x = x
         self.position.y = y
 
-    def attack(self, target: 'Entity'):
+    def attack(self, target: 'Entity', time: int):
         distance = self.position.distance_to(target.position)
         if distance <= self.range:
-            attack_obj = Attack(damage=self.damage, knockback=self.knockback, src_loc=self.position)
+            direction = target.position - self.position
+            direction = direction.normalize()
+            attack_obj = Attack(damage=self.damage, force=self.knockback_force, direction=direction,
+                                time=time, knockback_time=self.knockback_time)
             target.take_damage(attack_obj)
+            target.received_attack = attack_obj
 
     def take_damage(self, attack: Attack):
         self.health -= attack.damage
@@ -44,5 +52,5 @@ class Entity:
     def die(self):
         del self
 
-    def update(self, player):
+    def update(self, player, time):
         pass

@@ -2,7 +2,9 @@ import pygame
 
 
 class Attack:
-    def __init__(self, damage=0, knockback=0, src_loc=(0, 0)):
+    def __init__(self, damage=0, force=0, direction=None, time=None, knockback_time=250):
         self.damage = damage
-        self.knockback = knockback
-        self.src_loc = src_loc
+        self.force = force
+        self.direction = direction
+        self.time = time
+        self.knockback_time = knockback_time
