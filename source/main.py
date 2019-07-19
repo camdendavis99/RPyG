@@ -23,6 +23,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 DARK_RED = (200, 0, 0)
 DARK_GREEN = (0, 200, 0)
+GRAY = (150, 150, 150)
 OUT_OF_BOUNDS_MESSAGE = 'That path is too dangerous for now'
 
 clock = pygame.time.Clock()
@@ -113,6 +114,17 @@ def draw_entities(entity_list: List[Entity]):
         entity.draw(game_display)
 
 
+def display_health_bar(health):
+    bar_left_x = WIN_WIDTH // 6
+    bar_right_x = WIN_WIDTH - bar_left_x
+    bar_max_length = bar_right_x - bar_left_x
+    bar_cur_length = int(health / 100 * bar_max_length)
+    gray_bar = pygame.Rect(bar_left_x, 16, bar_max_length, 30)
+    red_bar = pygame.Rect(bar_left_x, 16, bar_cur_length, 30)
+    pygame.draw.rect(game_display, GRAY, gray_bar)
+    pygame.draw.rect(game_display, RED, red_bar)
+
+
 def game_loop():
     player = Player()
     entities: List[Entity] = [player]
@@ -154,6 +166,7 @@ def game_loop():
 
         game_display.fill(BLACK)
         draw_entities(entities)
+        display_health_bar(player.health)
         pygame.display.update()
         clock.tick(60)
 
