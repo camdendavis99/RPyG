@@ -4,11 +4,11 @@ import os
 
 
 class Goblin(Enemy):
-    GOBLIN_IMG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'goblin.png')
+    GOBLIN_IMG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'Goblin')
 
     def __init__(self):
         Enemy.__init__(self)
-        self.image = pygame.image.load(self.GOBLIN_IMG_PATH)
+        self.image_dir = self.GOBLIN_IMG_DIR
         self.health = 25
         self.speed = 2
         self.damage = 1

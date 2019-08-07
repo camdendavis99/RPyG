@@ -13,7 +13,7 @@ class Enemy(Entity):
         self.range = None
         self.knockback_force = 0.2
 
-    def change_velocity(self, player):
+    def change_velocity(self, player=None):
         buffer = 5
         vector_to_player = player.position - self.position
         if vector_to_player.magnitude() < self.range + buffer:
@@ -23,7 +23,11 @@ class Enemy(Entity):
             self.velocity = self.speed * vector_to_player.normalize()
 
     def update(self, player, time):
-        self.change_velocity(player)
+        if self.received_attack:
+            self.knockback(time)
+        else:
+            self.change_velocity(player=player)
+            self.change_direction()
         self.move()
         if self.position.distance_to(player.position) <= self.range:
             self.attack(player, time)

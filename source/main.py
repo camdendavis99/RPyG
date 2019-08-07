@@ -44,7 +44,7 @@ def display_message(text: str, font_size=24, location=(WIN_WIDTH/2, WIN_HEIGHT -
     time.sleep(2)
 
 
-def exit_button_click():
+def exit_game():
     pygame.quit()
     quit()
 
@@ -89,7 +89,7 @@ def intro():
         if exit_button.collidepoint(mouse_x, mouse_y):
             pygame.draw.rect(game_display, DARK_RED, exit_button)
             if click:
-                exit_button_click()
+                exit_game()
         else:
             pygame.draw.rect(game_display, RED, exit_button)
 
@@ -143,7 +143,6 @@ def game_loop():
                 spawn_x = random.randint(goblin.width/2, WIN_WIDTH - goblin.height/2)
                 spawn_y = random.randint(goblin.height/2, WIN_HEIGHT - goblin.height/2)
                 goblin.spawn(spawn_x, spawn_y)
-            player.change_velocity(event)
 
         update_entities(entities, player, pygame.time.get_ticks())
 
